@@ -1,0 +1,13 @@
+import pandas as pd, streamlit as st
+st.set_page_config(page_title="Books Data Visualization Dashboard",layout="wide")
+st.title("Books Data Visualization Dashboard")
+st.caption("CodeAlpha Data Analytics Internship — Task 3")
+up=st.file_uploader("Upload the full books_dataset.csv from Task 1",type=["csv"])
+df=pd.read_csv(up) if up else pd.read_csv("data/sample_dataset.csv")
+if not up: st.info("Showing the included sample dataset. Upload the full Task 1 dataset for complete analysis.")
+df["price_numeric"]=df["price"].str.replace("£","",regex=False).str.replace(",","",regex=False).astype(float)
+mp={"One":1,"Two":2,"Three":3,"Four":4,"Five":5}; df["rating_numeric"]=df["rating"].map(mp)
+a,b,c,d=st.columns(4); a.metric("Books",len(df)); b.metric("Average Price",f"£{df.price_numeric.mean():.2f}"); c.metric("Minimum Price",f"£{df.price_numeric.min():.2f}"); d.metric("Maximum Price",f"£{df.price_numeric.max():.2f}")
+st.subheader("Price by Book"); st.bar_chart(df.set_index("title")["price_numeric"])
+st.subheader("Rating Distribution"); st.bar_chart(df["rating_numeric"].value_counts().sort_index())
+st.subheader("Dataset Preview"); st.dataframe(df,use_container_width=True)

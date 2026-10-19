@@ -1,0 +1,16 @@
+import os, pandas as pd, matplotlib.pyplot as plt, seaborn as sns
+INPUT="data/sample_dataset.csv"; OUT="visuals"; os.makedirs(OUT,exist_ok=True)
+df=pd.read_csv(INPUT)
+df["price_numeric"]=df["price"].str.replace("£","",regex=False).str.replace(",","",regex=False).astype(float)
+rating_map={"One":1,"Two":2,"Three":3,"Four":4,"Five":5}
+df["rating_numeric"]=df["rating"].map(rating_map)
+df.describe(include="all").to_csv(OUT+"/summary.csv")
+sns.set_theme(style="whitegrid")
+plt.figure(figsize=(8,5)); sns.histplot(df["price_numeric"],bins=10,kde=True); plt.title("Book Price Distribution"); plt.xlabel("Price (£)"); plt.ylabel("Number of Books"); plt.tight_layout(); plt.savefig(OUT+"/01_price_distribution.png",dpi=200); plt.close()
+rc=df["rating_numeric"].value_counts().sort_index()
+plt.figure(figsize=(8,5)); sns.barplot(x=rc.index.astype(str),y=rc.values); plt.title("Books by Star Rating"); plt.xlabel("Star Rating"); plt.ylabel("Number of Books"); plt.tight_layout(); plt.savefig(OUT+"/02_rating_counts.png",dpi=200); plt.close()
+ac=df["availability"].value_counts()
+plt.figure(figsize=(7,5)); plt.pie(ac.values,labels=ac.index,autopct="%1.1f%%",startangle=90); plt.title("Book Availability"); plt.tight_layout(); plt.savefig(OUT+"/03_availability.png",dpi=200); plt.close()
+top=df.sort_values("price_numeric",ascending=False).head(10).sort_values("price_numeric")
+plt.figure(figsize=(9,5)); sns.barplot(data=top,x="price_numeric",y="title"); plt.title("Highest-Priced Books"); plt.xlabel("Price (£)"); plt.ylabel("Book"); plt.tight_layout(); plt.savefig(OUT+"/04_highest_priced_books.png",dpi=200); plt.close()
+print("Visualization completed:",len(df),"rows")
